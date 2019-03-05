@@ -33,9 +33,8 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(ui->chk_bold, &QCheckBox::stateChanged, this, &MainWindow::chk_bold_changed);
   connect(ui->chk_italic, &QCheckBox::stateChanged, this, &MainWindow::chk_italic_changed);
 
-  //todo comment this and move 800x600 to some parameters
   QImage img("/home/lezh1k/NumberMaker/base.jpg");
-  img = img.scaled(800, 600);
+  img = img.scaled(FRAME_WIDTH, FRAME_HEIGHT);
   m_ic.load_base(img);
 }
 
@@ -45,9 +44,7 @@ MainWindow::~MainWindow() {
 ///////////////////////////////////////////////////////
 
 void MainWindow::btn_process_released() {
-  ui->btn_process->setEnabled(false);
-  drawText();
-  ui->btn_process->setEnabled(true);
+  //todo implement generation mechanism
 }
 ///////////////////////////////////////////////////////
 
@@ -59,7 +56,7 @@ void MainWindow::btn_background_released() {
     return;
   ui->le_base->setText(img_path);
   QImage img(img_path);
-  img = img.scaled(800, 600);
+  img = img.scaled(FRAME_WIDTH, FRAME_HEIGHT);
   m_ic.load_base(img);
   drawText();
 }
