@@ -33,18 +33,14 @@ private slots:
   void sb_size_value_changed(int size);
 
 private:
+  static const int FRAME_WIDTH = 800;
+  static const int FRAME_HEIGHT = 600;
+
   Ui::MainWindow *ui;
   QPixmap m_pm_base;
   QPixmap m_pm_text;
   QPixmap m_pm_composite;
-
   CImageController m_ic;
-
-  double m_x;
-  double m_y;
-  QString m_txt;
-  QFont m_font;
-
   void drawText();
 };
 

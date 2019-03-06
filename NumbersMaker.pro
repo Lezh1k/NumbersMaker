@@ -24,15 +24,20 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++11
 
+LIBS += -lgtest
 INCLUDEPATH += include
 SOURCES += \
         src/main.cpp \
         src/mainwindow.cpp \
-    src/imagecontroller.cpp
+        src/imagecontroller.cpp \
+        src/utils.cpp \
+    tests/utils_test.cpp \
+    tests/imagecontroller_test.cpp
 
 HEADERS += \
         include/mainwindow.h \
-    include/imagecontroller.h
+        include/imagecontroller.h \
+        include/utils.h
 
 FORMS += \
         forms/mainwindow.ui

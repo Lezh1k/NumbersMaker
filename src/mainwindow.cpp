@@ -9,16 +9,16 @@
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
-  ui(new Ui::MainWindow),
-  m_x(0.0),
-  m_y(0.0),
-  m_txt("TXT") {
+  ui(new Ui::MainWindow) {
 
   ui->setupUi(this);  
   ui->lbl_image->setScaledContents(false);
-  ui->le_text->setText(m_txt);
-  m_font = ui->cb_fonts->currentFont();
-  m_font.setPointSize(200); //default value in designer
+  ui->le_text->setText(m_ic.current_text());
+  m_ic.set_font(ui->cb_fonts->currentFont());
+
+  static const int initial_size = 200;
+  ui->sb_size->setValue(initial_size);
+  m_ic.set_font_size(initial_size);
 
   connect(ui->btn_process, &QPushButton::released, this, &MainWindow::btn_process_released);
   connect(ui->btn_background, &QPushButton::released, this, &MainWindow::btn_background_released);
@@ -36,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
   QImage img("/home/lezh1k/NumberMaker/base.jpg");
   img = img.scaled(FRAME_WIDTH, FRAME_HEIGHT);
   m_ic.load_base(img);
+  drawText();
 }
 
 MainWindow::~MainWindow() {
@@ -72,52 +73,52 @@ void MainWindow::btn_out_released() {
 ///////////////////////////////////////////////////////
 
 void MainWindow::dsb_x_value_changed(double v) {
-  m_x = v;
+  m_ic.set_x(v);
   drawText();
 }
 ///////////////////////////////////////////////////////
 
 void MainWindow::dsb_y_value_changed(double v) {
-  m_y = v;
+  m_ic.set_y(v);
   drawText();
 }
 ///////////////////////////////////////////////////////
 
 void MainWindow::le_text_text_changed(const QString &str) {
-  m_txt = str;
+  m_ic.set_text(str);
   drawText();
 }
 ///////////////////////////////////////////////////////
 
 void MainWindow::cb_fonts_current_font_changed(const QFont &f) {
-  m_font = f;
-  m_font.setPointSize(ui->sb_size->value());
-  m_font.setItalic(ui->chk_italic->checkState()==Qt::Checked);
-  m_font.setBold(ui->chk_bold->checkState()==Qt::Checked);
+  m_ic.set_font(f);
+  m_ic.set_font_size(ui->sb_size->value());
+  m_ic.set_italic(ui->chk_italic->checkState() == Qt::Checked);
+  m_ic.set_bold(ui->chk_bold->checkState() == Qt::Checked);
   drawText();
 }
 ///////////////////////////////////////////////////////
 
 void MainWindow::chk_bold_changed(int state) {
-  m_font.setBold(state == Qt::Checked);
+  m_ic.set_bold(state == Qt::Checked);
   drawText();
 }
 ///////////////////////////////////////////////////////
 
 void MainWindow::chk_italic_changed(int state) {
-  m_font.setItalic(state == Qt::Checked);
+  m_ic.set_italic(state == Qt::Checked);
   drawText();
 }
 ///////////////////////////////////////////////////////
 
 void MainWindow::sb_size_value_changed(int size) {
-  m_font.setPointSize(size);
+  m_ic.set_font_size(size);
   drawText();
 }
 ///////////////////////////////////////////////////////
 
 void MainWindow::drawText() {
-  m_ic.draw_text(m_x, m_y, m_font, Qt::black, m_txt);
+  m_ic.draw_text();
   ui->lbl_image->setPixmap(m_ic.compozite_pixmap());
 }
 ///////////////////////////////////////////////////////

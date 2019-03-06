@@ -1,17 +1,33 @@
 #include <QPainter>
 #include <math.h>
 #include "imagecontroller.h"
+#include "utils.h"
 
-CImageController::CImageController(QObject *parent) : QObject(parent) {
+CImageController::CImageController() :
+  m_x(0.0),
+  m_y(0.0),
+  m_txt("TXT"),
+  m_color(Qt::black) {
+  //do nothing
 }
 ///////////////////////////////////////////////////////
 
-CImageController::CImageController(const QImage &img) {
+CImageController::CImageController(const QImage &img) :
+  m_x(0.0),
+  m_y(0.0),
+  m_txt("TXT"),
+  m_color(Qt::black) {
+
   reset(img);
 }
 ///////////////////////////////////////////////////////
 
-CImageController::CImageController(const QString &path) {
+CImageController::CImageController(const QString &path) :
+  m_x(0.0),
+  m_y(0.0),
+  m_txt("TXT"),
+  m_color(Qt::black) {
+
   reset(QImage(path));
 }
 ///////////////////////////////////////////////////////
@@ -37,23 +53,18 @@ void CImageController::reset(const QImage &img) {
 }
 ///////////////////////////////////////////////////////
 
-bool CImageController::draw_text(double x,
-                                 double y,
-                                 const QFont &font,
-                                 const QColor &color,
-                                 const QString &txt) {
-
+bool CImageController::draw_text() {
   QPainter p;
   m_pm_font_layer.fill(Qt::transparent);
   if (!p.begin(&m_pm_font_layer))
     return false;
 
-  p.setPen(QPen(color));
-  p.setFont(font);
+//  p.setPen(QPen(m_color));
+//  p.setFont(m_font);
   int xi, yi;
-  xi = static_cast<int>(std::floor(x * m_pm_base.width()));
-  yi = static_cast<int>(std::floor(y * m_pm_base.height()));
-  p.drawText(xi, yi, txt);
+  xi = static_cast<int>(std::floor(m_x * m_pm_base.width()));
+  yi = static_cast<int>(std::floor(m_y * m_pm_base.height()));
+  p.drawText(xi, yi, m_txt);
   p.end();
 
   if (!p.begin(&m_pm_composite))
@@ -63,5 +74,27 @@ bool CImageController::draw_text(double x,
   p.drawPixmap(0, 0, m_pm_font_layer);
   p.end();
   return true;
+}
+///////////////////////////////////////////////////////
+
+int CImageController::current_width() const noexcept {
+  return m_pm_base.isNull() ? 0 : m_pm_base.width();
+}
+///////////////////////////////////////////////////////
+
+int CImageController::current_height() const noexcept {
+  return m_pm_base.isNull() ? 0 : m_pm_base.height();
+}
+///////////////////////////////////////////////////////
+
+const QPixmap &CImageController::compozite_pixmap() const noexcept {
+  return m_pm_composite;
+}
+///////////////////////////////////////////////////////
+
+void CImageController::set_thumb_count(int v) noexcept {
+  int ns = nearest_square(v);
+  m_rows = sqrti(ns);
+  m_cols = (v + m_rows - 1) / m_rows;
 }
 ///////////////////////////////////////////////////////
