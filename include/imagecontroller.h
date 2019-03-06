@@ -14,6 +14,7 @@ private:
   int m_cols;
   //image settings
   QPixmap m_pm_base;
+  QPixmap m_pm_base_thumb;
   QPixmap m_pm_font_layer;
   QPixmap m_pm_composite;
 
@@ -25,6 +26,7 @@ private:
   QColor m_color;
 
   void reset(const QImage& img);
+  void reset_thumb_table();
 
 public:
 
