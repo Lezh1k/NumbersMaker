@@ -80,32 +80,30 @@ void CImageController::reset_thumb_table() {
 }
 ///////////////////////////////////////////////////////
 
-bool CImageController::make_composite(const QPixmap &src,
-                                      QPixmap &font_layer,
-                                      QPixmap &composite) {
+bool CImageController::draw_thumbs_text() {
   QFont tf(m_font);
   int max_size = font_max_size(tf,
-                               src.width(),
-                               src.height(),
+                               m_pm_base_thumb.width(),
+                               m_pm_base_thumb.height(),
                                m_txt);
   int fs = static_cast<int>(std::floor(max_size*m_font_size));
   tf.setPointSize(fs);
 
   QPainter p;
-  font_layer.fill(Qt::transparent);
-  if (!p.begin(&font_layer))
+  m_pm_font_thumb_layer.fill(Qt::transparent);
+  if (!p.begin(&m_pm_font_thumb_layer))
     return false;
 
   p.setPen(QPen(m_color));
   p.setFont(tf);
 
   int xi, yi;
-  xi = static_cast<int>(std::floor(m_x * src.width()));
-  yi = static_cast<int>(std::floor(m_y * src.height()));
+  xi = static_cast<int>(std::floor(m_x * m_pm_base_thumb.width()));
+  yi = static_cast<int>(std::floor(m_y * m_pm_base_thumb.height()));
   p.drawText(xi, yi, m_txt);
   p.end();
 
-  if (!p.begin(&composite))
+  if (!p.begin(&m_pm_composite_thumb))
     return false;
 
   int tc = 0;
@@ -113,21 +111,16 @@ bool CImageController::make_composite(const QPixmap &src,
     for (int tx = 0; tx < m_cols; ++tx) {
       if (++tc > m_thumbs_count)
         goto thumbs_end;
-      int dx = src.width()*tx + tx;
-      int dy = src.height()*ty + ty;
-      p.drawPixmap(dx, dy, src);
-      p.drawPixmap(dx, dy, font_layer);
+      int dx = m_pm_base_thumb.width()*tx + tx;
+      int dy = m_pm_base_thumb.height()*ty + ty;
+      p.drawPixmap(dx, dy, m_pm_base_thumb);
+      p.drawPixmap(dx, dy, m_pm_font_thumb_layer);
     }
   }
 thumbs_end:
 
   p.end();
   return true;
-}
-///////////////////////////////////////////////////////
-
-bool CImageController::draw_thumbs_text() {
-  return make_composite(m_pm_base_thumb, m_pm_font_thumb_layer, m_pm_composite_thumb);
 }
 ///////////////////////////////////////////////////////
 

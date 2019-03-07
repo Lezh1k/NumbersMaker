@@ -31,9 +31,6 @@ private:
   QFont m_font;
   QColor m_color;
 
-  bool make_composite(const QPixmap &src,
-                      QPixmap &font_layer,
-                      QPixmap &composite);
   void reset(const QImage& img);
   void reset_thumb_table();
 
