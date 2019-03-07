@@ -30,7 +30,7 @@ private slots:
   void chk_bold_changed(int state);
   void chk_italic_changed(int state);
 
-  void sb_size_value_changed(int size);
+  void sb_size_value_changed(double size);
 
 private:
   static const int FRAME_WIDTH = 800;

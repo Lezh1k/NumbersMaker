@@ -1,3 +1,7 @@
+#include <QFont>
+#include <QFontMetrics>
+#include <QString>
+
 #include "utils.h"
 
 int sqrti(int x) {
@@ -31,5 +35,29 @@ int nearest_square(int x) {
   if (val*val == x) return x;
   val += 1;
   return val*val;
+}
+///////////////////////////////////////////////////////
+
+int font_max_size(const QFont &font,
+                  int shape_w, int shape_h,
+                  const QString &str) {
+  QFont tf(font);
+  QFontMetrics fm(font);
+  int f, l, m;
+  l = 4096; f = 0;
+
+  while (f < l) {
+    m = (f+l) >> 1;
+    tf.setPointSize(m);
+    fm = QFontMetrics(tf);
+
+    if (fm.height() > shape_h ||
+        fm.width(str) > shape_w) {
+      l = m;
+    } else {
+      f = m+1;
+    }
+  }
+  return l;
 }
 ///////////////////////////////////////////////////////
