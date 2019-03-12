@@ -41,13 +41,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
   connect(&m_tc, &CTextController::on_progress, this, &MainWindow::on_progress);
   connect(&m_tc, &CTextController::process_finished, this, &MainWindow::process_finished);
-
-  //todo remove
-  QImage img("/home/lezh1k/base.jpg");
-  img = img.scaled(ui->lbl_image->width(), ui->lbl_image->height());
-  m_ic.load_base(img);
-  m_ic.set_font_size(initial_size);
-  draw_thumbs();
 }
 
 MainWindow::~MainWindow() {
@@ -56,7 +49,6 @@ MainWindow::~MainWindow() {
 ///////////////////////////////////////////////////////
 
 void MainWindow::btn_process_released() {
-
   QString out_dir = ui->le_output->text();
   if (out_dir.isNull() || out_dir.isEmpty())
     out_dir = QStandardPaths::standardLocations(QStandardPaths::HomeLocation).last();
@@ -64,8 +56,9 @@ void MainWindow::btn_process_released() {
   if (width <= 0)
     width = 1;
 
-  int first = 1;
-  int last = m_ic.thumbs_count()*4;
+  m_tc.set_out_dir(out_dir);
+  int first = ui->sb_first->value();
+  int last = ui->sb_last->value();
   if (!m_tc.set_numbers_interval(first, last, width)) {
     //todo show error msg;
     return;
@@ -98,6 +91,7 @@ void MainWindow::btn_background_released() {
   QImage img(img_path);
   img = img.scaled(ui->lbl_image->width(), ui->lbl_image->height());
   m_ic.load_base(img);
+  m_ic.set_font_size(ui->dsb_font_size->value());
   draw_thumbs();
 }
 ///////////////////////////////////////////////////////

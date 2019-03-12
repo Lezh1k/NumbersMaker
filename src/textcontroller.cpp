@@ -35,12 +35,14 @@ void CTextController::start() {
     int nimg = static_cast<int>(m_lst_texts.size()) / m_pic->thumbs_count();
     std::vector<QString>::const_iterator tif = m_lst_texts.cbegin();
     std::vector<QString>::const_iterator til = m_lst_texts.cend();
-    while (nimg--) {
+    for (int num = 0; num <= nimg; ++num) {
       m_pic->draw_text(tif, til);
       tif += m_pic->thumbs_count();
-      QString sp = m_out_dir + QDir::separator() + QString("%1.png").arg(nimg);
+      QString sp = m_out_dir + QDir::separator() + QString("%1.png").arg(num);
       m_pic->compozite_pixmap().save(sp);
       processed += m_pic->thumbs_count();
+      if (processed > static_cast<int>(m_lst_texts.size()))
+        processed = static_cast<int>(m_lst_texts.size());
       emit on_progress(processed, static_cast<int>(m_lst_texts.size()));
     }
   } while (false);

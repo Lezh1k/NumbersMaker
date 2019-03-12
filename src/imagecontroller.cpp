@@ -10,7 +10,7 @@ CImageController::CImageController() :
   m_font_size(0.0),
   m_x(0.0),
   m_y(0.0),
-  m_txt("TXT"),
+  m_txt("28"),
   m_color(Qt::black) {
   //do nothing
 
@@ -24,7 +24,7 @@ CImageController::CImageController(const QImage &img) :
   m_font_size(0.0),
   m_x(0.0),
   m_y(0.0),
-  m_txt("TXT"),
+  m_txt("28"),
   m_color(Qt::black) {
 
   reset(img);
@@ -38,7 +38,7 @@ CImageController::CImageController(const QString &path) :
   m_font_size(0.0),
   m_x(0.0),
   m_y(0.0),
-  m_txt("TXT"),
+  m_txt("28"),
   m_color(Qt::black) {
 
   reset(QImage(path));
@@ -179,8 +179,8 @@ const QPixmap &CImageController::compozite_thumbs_pixmap() const noexcept {
 
 void CImageController::set_thumb_count(int v) noexcept {
   int ns = nearest_square(v);
-  m_rows = sqrti(ns);
-  m_cols = (v + m_rows - 1) / m_rows;
+  m_cols = m_rows = sqrti(ns);
+  //m_cols = (v + m_rows - 1) / m_rows;
   m_thumbs_count = v;
   reset_thumb_table();
 }
