@@ -32,12 +32,14 @@ SOURCES += \
         src/imagecontroller.cpp \
         src/utils.cpp \
     tests/utils_test.cpp \
-    tests/imagecontroller_test.cpp
+    tests/imagecontroller_test.cpp \
+    src/textcontroller.cpp
 
 HEADERS += \
         include/mainwindow.h \
         include/imagecontroller.h \
-        include/utils.h
+        include/utils.h \
+    include/textcontroller.h
 
 FORMS += \
         forms/mainwindow.ui

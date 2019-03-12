@@ -5,7 +5,10 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QDoubleSpinBox>
+#include <QThread>
+
 #include "imagecontroller.h"
+#include "textcontroller.h"
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
@@ -15,29 +18,36 @@ MainWindow::MainWindow(QWidget *parent) :
   ui->lbl_image->setScaledContents(false);
   ui->le_text->setText(m_ic.current_text());
 
+  m_tc.set_pic(&m_ic);
   m_ic.set_font(ui->cb_fonts->currentFont());
   static const double initial_size = 0.35;
   ui->dsb_font_size->setValue(initial_size);
 
-  connect(ui->btn_process, &QPushButton::released, this, &MainWindow::btn_process_released);
   connect(ui->btn_background, &QPushButton::released, this, &MainWindow::btn_background_released);
   connect(ui->btn_output, &QPushButton::released, this, &MainWindow::btn_out_released);
 
+  connect(ui->sb_thubm_count, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &MainWindow::sb_thumbs_count_value_changed);
   connect(ui->dsb_x, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &MainWindow::dsb_x_value_changed);
   connect(ui->dsb_y, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &MainWindow::dsb_y_value_changed);
-  connect(ui->dsb_font_size, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &MainWindow::sb_size_value_changed);
+  connect(ui->dsb_font_size, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &MainWindow::dsb_size_value_changed);
 
   connect(ui->le_text, &QLineEdit::textChanged, this, &MainWindow::le_text_text_changed);
   connect(ui->cb_fonts, &QFontComboBox::currentFontChanged, this, &MainWindow::cb_fonts_current_font_changed);
   connect(ui->chk_bold, &QCheckBox::stateChanged, this, &MainWindow::chk_bold_changed);
   connect(ui->chk_italic, &QCheckBox::stateChanged, this, &MainWindow::chk_italic_changed);
 
-  QImage img("/home/lezh1k/base.jpg");
-  img = img.scaled(FRAME_WIDTH, FRAME_HEIGHT);
-  m_ic.load_base(img);
+  connect(ui->btn_process, &QPushButton::released, this, &MainWindow::btn_process_released);
+  connect(ui->btn_cancel, &QPushButton::released, this, &MainWindow::btn_cancel_released);
 
+  connect(&m_tc, &CTextController::on_progress, this, &MainWindow::on_progress);
+  connect(&m_tc, &CTextController::process_finished, this, &MainWindow::process_finished);
+
+  //todo remove
+  QImage img("/home/lezh1k/base.jpg");
+  img = img.scaled(ui->lbl_image->width(), ui->lbl_image->height());
+  m_ic.load_base(img);
   m_ic.set_font_size(initial_size);
-  drawText();
+  draw_thumbs();
 }
 
 MainWindow::~MainWindow() {
@@ -46,7 +56,35 @@ MainWindow::~MainWindow() {
 ///////////////////////////////////////////////////////
 
 void MainWindow::btn_process_released() {
-  //todo implement generation mechanism
+
+  QString out_dir = ui->le_output->text();
+  if (out_dir.isNull() || out_dir.isEmpty())
+    out_dir = QStandardPaths::standardLocations(QStandardPaths::HomeLocation).last();
+  int width = m_ic.current_text().size();
+  if (width <= 0)
+    width = 1;
+
+  int first = 1;
+  int last = m_ic.thumbs_count()*4;
+  if (!m_tc.set_numbers_interval(first, last, width)) {
+    //todo show error msg;
+    return;
+  }
+
+  ui->btn_cancel->setEnabled(true);
+  ui->btn_process->setEnabled(false);
+  QThread *th = new QThread;
+  connect(th, &QThread::started, &m_tc, &CTextController::start);
+  connect(&m_tc, &CTextController::process_finished, th, &QThread::quit);
+  connect(th, &QThread::finished, th, &QThread::deleteLater);
+
+  th->start();
+}
+
+void MainWindow::btn_cancel_released() {
+  m_tc.interrupt();
+  ui->btn_cancel->setEnabled(false);
+  ui->btn_process->setEnabled(true);
 }
 ///////////////////////////////////////////////////////
 
@@ -58,9 +96,9 @@ void MainWindow::btn_background_released() {
     return;
   ui->le_base->setText(img_path);
   QImage img(img_path);
-  img = img.scaled(FRAME_WIDTH, FRAME_HEIGHT);
+  img = img.scaled(ui->lbl_image->width(), ui->lbl_image->height());
   m_ic.load_base(img);
-  drawText();
+  draw_thumbs();
 }
 ///////////////////////////////////////////////////////
 
@@ -75,19 +113,19 @@ void MainWindow::btn_out_released() {
 
 void MainWindow::dsb_x_value_changed(double v) {
   m_ic.set_x(v);
-  drawText();
+  draw_thumbs();
 }
 ///////////////////////////////////////////////////////
 
 void MainWindow::dsb_y_value_changed(double v) {
   m_ic.set_y(v);
-  drawText();
+  draw_thumbs();
 }
 ///////////////////////////////////////////////////////
 
 void MainWindow::le_text_text_changed(const QString &str) {
   m_ic.set_text(str);
-  drawText();
+  draw_thumbs();
 }
 ///////////////////////////////////////////////////////
 
@@ -96,29 +134,47 @@ void MainWindow::cb_fonts_current_font_changed(const QFont &f) {
   m_ic.set_font_size(ui->dsb_font_size->value());
   m_ic.set_italic(ui->chk_italic->checkState() == Qt::Checked);
   m_ic.set_bold(ui->chk_bold->checkState() == Qt::Checked);
-  drawText();
+  draw_thumbs();
 }
 ///////////////////////////////////////////////////////
 
 void MainWindow::chk_bold_changed(int state) {
   m_ic.set_bold(state == Qt::Checked);
-  drawText();
+  draw_thumbs();
 }
 ///////////////////////////////////////////////////////
 
 void MainWindow::chk_italic_changed(int state) {
   m_ic.set_italic(state == Qt::Checked);
-  drawText();
+  draw_thumbs();
 }
 ///////////////////////////////////////////////////////
 
-void MainWindow::sb_size_value_changed(double size) {
-  m_ic.set_font_size(size);
-  drawText();
+void MainWindow::on_progress(int current, int total) {
+  ui->pb_progress->setMaximum(total);
+  ui->pb_progress->setValue(current);
 }
 ///////////////////////////////////////////////////////
 
-void MainWindow::drawText() {
+void MainWindow::process_finished() {
+  ui->btn_cancel->setEnabled(false);
+  ui->btn_process->setEnabled(true);
+}
+///////////////////////////////////////////////////////
+
+void MainWindow::dsb_size_value_changed(double v) {
+  m_ic.set_font_size(v);
+  draw_thumbs();
+}
+///////////////////////////////////////////////////////
+
+void MainWindow::sb_thumbs_count_value_changed(int v) {
+  m_ic.set_thumb_count(v);
+  draw_thumbs();
+}
+///////////////////////////////////////////////////////
+
+void MainWindow::draw_thumbs() {
   m_ic.draw_thumbs_text();
   ui->lbl_image->setPixmap(m_ic.compozite_thumbs_pixmap());
 }

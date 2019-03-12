@@ -6,6 +6,7 @@
 #include <QPixmap>
 #include <QFont>
 #include <QColor>
+#include <QString>
 
 class CImageController {
 
@@ -18,7 +19,7 @@ private:
   QPixmap m_pm_base_thumb;
 
   QPixmap m_pm_font_layer;
-  QPixmap m_pm_font_thumb_layer;
+  QPixmap m_pm_font_layer_thumb;
 
   QPixmap m_pm_composite;
   QPixmap m_pm_composite_thumb;
@@ -43,13 +44,16 @@ public:
 
   void load_base(const QImage& img);
   void load_base(const QString& path);
+
+  bool draw_text(std::vector<QString>::const_iterator tif, std::vector<QString>::const_iterator til);
   bool draw_thumbs_text();
 
-
+  const QPixmap &compozite_pixmap(void) const noexcept {return m_pm_composite;}
   const QPixmap &compozite_thumbs_pixmap(void) const noexcept;
   //getters and setters
   int rows() const noexcept {return m_rows;}
   int cols() const noexcept {return m_cols;}
+  int thumbs_count() const noexcept {return m_thumbs_count;}
 
   double current_font_size() const noexcept {return m_font_size;}
   double current_x() const noexcept { return m_x;}
