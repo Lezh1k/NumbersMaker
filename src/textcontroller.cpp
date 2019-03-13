@@ -32,10 +32,11 @@ void CTextController::start() {
     if (!m_pic)
       break;
 
-    int nimg = static_cast<int>(m_lst_texts.size()) / m_pic->thumbs_count();
+    int t = static_cast<int>(m_lst_texts.size());
+    int nimg = (t + m_pic->thumbs_count() - 1) / m_pic->thumbs_count();
     std::vector<QString>::const_iterator tif = m_lst_texts.cbegin();
     std::vector<QString>::const_iterator til = m_lst_texts.cend();
-    for (int num = 0; num <= nimg; ++num) {
+    for (int num = 0; num < nimg; ++num) {
       m_pic->draw_text(tif, til);
       tif += m_pic->thumbs_count();
       QString sp = m_out_dir + QDir::separator() + QString("%1.png").arg(num);
