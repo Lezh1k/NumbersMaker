@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent) :
   ui(new Ui::MainWindow) {
 
   ui->setupUi(this);  
-  ui->lbl_image->setScaledContents(false);
+  ui->lbl_image->setScaledContents(true);
   ui->le_text->setText(m_ic.current_text());
 
   m_tc.set_pic(&m_ic);
@@ -89,8 +89,7 @@ void MainWindow::btn_background_released() {
     return;
   ui->le_base->setText(img_path);
   QImage img(img_path);
-  img = img.scaled(ui->lbl_image->width(), ui->lbl_image->height());
-  m_ic.load_base(img);
+  m_ic.load_base(img, ui->lbl_image->width(), ui->lbl_image->height());
   m_ic.set_font_size(ui->dsb_font_size->value());
   draw_thumbs();
 }

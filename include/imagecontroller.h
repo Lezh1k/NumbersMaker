@@ -16,6 +16,8 @@ private:
   int m_thumbs_count;
 
   QPixmap m_pm_base;
+  int m_scaled_base_w;
+  int m_scaled_base_h;
   QPixmap m_pm_base_thumb;
 
   QPixmap m_pm_font_layer;
@@ -32,18 +34,16 @@ private:
   QFont m_font;
   QColor m_color;
 
-  void reset(const QImage& img);
+  void reset(const QImage& img, int w, int h);
   void reset_thumb_table();
 
 public:
 
   CImageController();
-  explicit CImageController(const QImage& img);
-  explicit CImageController(const QString& path);
   ~CImageController(void);
 
-  void load_base(const QImage& img);
-  void load_base(const QString& path);
+  void load_base(const QImage& img, int w, int h);
+  void load_base(const QString& path, int w, int h);
 
   bool draw_text(std::vector<QString>::const_iterator tif, std::vector<QString>::const_iterator til);
   bool draw_thumbs_text();

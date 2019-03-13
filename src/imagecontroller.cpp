@@ -12,67 +12,39 @@ CImageController::CImageController() :
   m_y(0.0),
   m_txt("28"),
   m_color(Qt::black) {
-  //do nothing
-
-}
-///////////////////////////////////////////////////////
-
-CImageController::CImageController(const QImage &img) :
-  m_rows(1),
-  m_cols(1),
-  m_thumbs_count(1),
-  m_font_size(0.0),
-  m_x(0.0),
-  m_y(0.0),
-  m_txt("28"),
-  m_color(Qt::black) {
-
-  reset(img);
-}
-///////////////////////////////////////////////////////
-
-CImageController::CImageController(const QString &path) :
-  m_rows(1),
-  m_cols(1),
-  m_thumbs_count(1),
-  m_font_size(0.0),
-  m_x(0.0),
-  m_y(0.0),
-  m_txt("28"),
-  m_color(Qt::black) {
-
-  reset(QImage(path));
 }
 ///////////////////////////////////////////////////////
 
 CImageController::~CImageController() {
 }
 
-void CImageController::load_base(const QImage &img) {
-  reset(img);
+void CImageController::load_base(const QImage &img, int w, int h) {
+  reset(img, w, h);
 }
 
-void CImageController::load_base(const QString &path) {
-  reset(QImage(path));
+void CImageController::load_base(const QString &path, int w, int h) {
+  reset(QImage(path), w, h);
 }
 ///////////////////////////////////////////////////////
 
-void CImageController::reset(const QImage &img) {
+void CImageController::reset(const QImage &img, int w, int h) {
   m_pm_base = QPixmap::fromImage(img);  
+  m_scaled_base_h = h;
+  m_scaled_base_w = w;
   reset_thumb_table();
 }
 ///////////////////////////////////////////////////////
 
 void CImageController::reset_thumb_table() {
-  int thumb_w = m_pm_base.width() / m_cols - 1;
-  int thumb_h = m_pm_base.height() / m_rows - 1;
+  int thumb_w = m_scaled_base_w / m_cols - 1;
+  int thumb_h = m_scaled_base_h / m_rows - 1;
 
-  m_pm_base_thumb = m_pm_base.scaled(thumb_w, thumb_h);
+  m_pm_base_thumb = m_pm_base.scaled(thumb_w, thumb_h, Qt::KeepAspectRatio);
   m_pm_font_layer = QPixmap(m_pm_base.width(), m_pm_base.height());
   m_pm_font_layer_thumb = QPixmap(m_pm_base_thumb.width(), m_pm_base_thumb.height());
 
   m_pm_composite = QPixmap(m_pm_base.width()*m_cols, m_pm_base.height()*m_rows); //huge pixmap for result images. WARNING!
-  m_pm_composite_thumb = QPixmap(m_pm_base.width(), m_pm_base.height());
+  m_pm_composite_thumb = QPixmap(m_scaled_base_w, m_scaled_base_h);
 
   m_pm_font_layer.fill(Qt::transparent);
   m_pm_font_layer_thumb.fill(Qt::transparent);
