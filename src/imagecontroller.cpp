@@ -151,8 +151,8 @@ const QPixmap &CImageController::compozite_thumbs_pixmap() const noexcept {
 
 void CImageController::set_thumb_count(int v) noexcept {
   int ns = nearest_square(v);
-  m_cols = m_rows = sqrti(ns);
-  //m_cols = (v + m_rows - 1) / m_rows;
+  m_rows = sqrti(ns);
+  m_cols = (v + m_rows - 1) / m_rows;
   m_thumbs_count = v;
   reset_thumb_table();
 }
